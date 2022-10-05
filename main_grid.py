@@ -2,14 +2,18 @@ import base64
 import json
 import re
 import time
-
 import serial
+
+
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import scipy.interpolate as sc
+
+import serial.tools.list_ports
+from playsound import playsound
 from dash import Dash, dcc, html, ctx
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
@@ -29,11 +33,20 @@ styles = {
 ## Initiate program
 # Searching for connected Arduino serial port
 
+# s = serial.Serial('/dev/tty.usbmodem1101', 115200)
+
+# ports = list(serial.tools.list_ports)
+# print(ports)
+# for p in ports:
+#     if "Arduino" in p[1]:
+#         print(p[1])
+#         s = serial.Serial(arduinoport[0])
+#         print('Oh WALL-E!')
+#         playsound('start_up_sound.mp3')
+
+# define serial port
 s = serial.Serial('/dev/tty.usbmodem1101', 115200)
-print("Connected correctly.\nStarting up DocumeNDT firmware...")
-
-
-# playsound('start_up_sound.mp3')
+print("oh WALL-E")
 
 
 def stream():
@@ -114,12 +127,12 @@ def surface_plot(df):
     z = -1 * np.array(df["h (z)"])
     # print(z)
 
-    xi = np.linspace(x.min(), x.max(), 100)
-    yi = np.linspace(y.min(), y.max(), 100)
+    xi = np.linspace(x.min(), x.max(), 200)
+    yi = np.linspace(y.min(), y.max(), 200)
 
     X, Y = np.meshgrid(xi, yi)
 
-    Z = sc.griddata((x, y), z, (X, Y), method='cubic')
+    Z = sc.griddata((x, y), z, (X, Y), method='nearest')
 
     fig = go.Figure(go.Surface(x=xi, y=yi, z=Z))
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
@@ -130,6 +143,10 @@ def surface_plot(df):
                           zaxis=dict(range=[min(z), max(z)])))
     # width=700,
     # margin=dict(r=20, l=10, b=10, t=10))
+    # camera = dict(
+    #     eye=dict(x=-1.1, y=-1.1, z=1.8)
+    # )
+    # fig.update_layout(scene_camera=camera)
 
     # fig.show()
     return fig
