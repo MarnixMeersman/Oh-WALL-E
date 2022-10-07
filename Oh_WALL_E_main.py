@@ -3,6 +3,8 @@ import json
 import re
 import time
 import serial
+import glob
+import sys
 
 
 import dash_bootstrap_components as dbc
@@ -32,21 +34,45 @@ styles = {
 
 ## Initiate program
 # Searching for connected Arduino serial port
+import sys
+import glob
+import serial
 
-# s = serial.Serial('/dev/tty.usbmodem1101', 115200)
 
-# ports = list(serial.tools.list_ports)
-# print(ports)
-# for p in ports:
-#     if "Arduino" in p[1]:
-#         print(p[1])
-#         s = serial.Serial(arduinoport[0])
-#         print('Oh WALL-E!')
-#         playsound('start_up_sound.mp3')
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
+print("Oh WALL_E\nHere are the available USB ports:", serial_ports())
+port = input("Please paste the correct serial port name below:\n")
+
 
 # define serial port
-s = serial.Serial('/dev/tty.usbmodem1101', 115200)
-print("oh WALL-E")
+s = serial.Serial(str(port), 115200)
+print("\n\n* * *\nConnected\n\n* * *")
 
 
 def stream():
