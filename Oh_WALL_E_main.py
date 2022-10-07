@@ -67,7 +67,7 @@ def serial_ports():
             pass
     return result
 print("Oh WALL_E\nHere are the available USB ports:", serial_ports())
-port = input("Please paste the correct serial port name below:\n")
+port = input("Please paste the correct serial port link below (without quotation marks, e.g. \"\"):\n")
 
 
 # define serial port
